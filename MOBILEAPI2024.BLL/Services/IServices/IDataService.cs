@@ -31,7 +31,7 @@ namespace MOBILEAPI2024.BLL.Services.IServices
         LoginResponse GetLoginAccess();
         Students GetStudentsData(string? studentNo, int entriesPerPage, int pageNo);
         AttendanceResponse GetAttendanceFromBS(string sessionId, string deviceId);
-        Students GetAttendanceFromDB(EventCollection getAttendance, LoginResponse getLoginAccess, string deviceId);
+        Students GetAttendanceFromDB(EventCollection getAttendance, LoginResponse getLoginAccess, string deviceId, DeviceConfigurationKCA checkDeviceConfig);
         List<StudentList> GetStudentsListForFilter();
         AttendanceSummery GetFilteredData(string studentNo, int month, int year,DateTime? date);
         List<LoginReportKCA> GetLoginReport(DateTime date);

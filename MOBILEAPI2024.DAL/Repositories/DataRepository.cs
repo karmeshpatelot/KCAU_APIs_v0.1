@@ -241,6 +241,8 @@ namespace MOBILEAPI2024.DAL.Repositories
                         OPTION (MAXRECURSION 0);
                         
                         ";
+            string query2 = @"
+                select UserName,ForDate,InTime,OutTime from User_InOut_Records_KCA where LocationType = 'campus' and UserName =@UserName and ForDate between @FromDate and @ToDate";
             var data = vconn.Query<CampusAttendance>(query, vParams).ToList();
             return data;
         }
@@ -268,9 +270,9 @@ namespace MOBILEAPI2024.DAL.Repositories
                         FROM 
                             DateRange dr
                         INNER JOIN 
-                            User_InOut_Records_KCA c ON c.ForDate = dr.ForDate AND c.UserName = 'KCA_11_11300'
+                            User_InOut_Records_KCA c ON c.ForDate = dr.ForDate AND c.UserName = @UserName AND c.LocationType = 'lecture'
                         WHERE 
-                            dr.ForDate BETWEEN '2024-10-01' AND '2024-10-25'
+                            dr.ForDate BETWEEN @FromDate AND @ToDate
                         ORDER BY 
                             dr.ForDate, c.InTime
                         OPTION (MAXRECURSION 0);
@@ -729,6 +731,23 @@ namespace MOBILEAPI2024.DAL.Repositories
             string query = @"Update Device_Configuration_KCA set Location = @Location, Type = @Type , CampusName = @CampusName where DeviceId = @DeviceId;
                     ";
             vconn.Execute(query, vParams);
+        }
+
+        public void UpdateInOutPunch(PunchModel punchModel)
+        {
+            using var vconn = GetOpenConnection(); // Open a connection to the database
+            // Employee exists, proceed with the insert query
+            var insertParams = new DynamicParameters();
+            insertParams.Add("@UserName", punchModel.UserName);
+            insertParams.Add("@LocationType", punchModel.LocationType);
+            insertParams.Add("@ForDate", punchModel.ForDate);
+            insertParams.Add("@OutTime", punchModel.OutTime);
+
+            string insertQuery = @"Update User_InOut_Records_KCA set OutTime = @OutTime where ForDate = @ForDate and UserName = @UserName and LocationType = @LocationType
+                                   ";
+
+            // Execute the insert query
+            vconn.Execute(insertQuery, insertParams);
         }
     }
 

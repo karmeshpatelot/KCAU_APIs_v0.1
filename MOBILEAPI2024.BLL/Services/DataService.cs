@@ -671,14 +671,12 @@ namespace MOBILEAPI2024.BLL.Services
                     {
                         // Deserialize the JSON response into AttendanceResponse model
                         var responseData = response.Content.ReadAsStringAsync().Result;
-                        Console.WriteLine("Raw JSON Response: " + responseData);
 
                         var attendanceResponse = Newtonsoft.Json.JsonConvert.DeserializeObject<AttendanceResponse>(responseData);
                         return attendanceResponse;
                     }
                     else
                     {
-                        Console.WriteLine("Request failed with status code: " + response.StatusCode);
                         return null;
                     }
                 }
@@ -690,7 +688,7 @@ namespace MOBILEAPI2024.BLL.Services
             }
         }
 
-        public Students GetAttendanceFromDB(EventCollection getAttendance, LoginResponse getLoginAccess, string deviceId)
+        public Students GetAttendanceFromDB(EventCollection getAttendance, LoginResponse getLoginAccess, string deviceId, DeviceConfigurationKCA deviceConfigurationKCA)
         {
             if (getAttendance.rows[0].user_id.user_id == null || getAttendance.rows[0].user_id.user_id == "0")
             {
@@ -700,7 +698,7 @@ namespace MOBILEAPI2024.BLL.Services
 
             punchModel.UserName = getAttendance.rows[0].user_id.user_id;
             punchModel.EnrollNo = getAttendance.rows[0].user_id.name;
-            punchModel.LocationType = "Campus";
+            punchModel.LocationType = deviceConfigurationKCA.Location;
             punchModel.ForDate = getAttendance.rows[0].server_datetime.Date;
             punchModel.InTime = getAttendance.rows[0].datetime;
             punchModel.OutTime = getAttendance.rows[0].datetime;
@@ -708,44 +706,97 @@ namespace MOBILEAPI2024.BLL.Services
             punchModel.IpAddress = "KCAU";
             punchModel.DeviceId = getAttendance.rows[0].device_id.id;
             punchModel.FeesStatus = "";
-
-            var getAttendance1 = _dataRepository.GetAttendanceFromDB(deviceId, getAttendance);
-            if (getAttendance1 != null)
+            if (deviceConfigurationKCA.Location == "lecture")
             {
-                if (getAttendance1.RowId == getAttendance.rows[0].id)
+                var getAttendance1 = _dataRepository.GetAttendanceFromDB(deviceId, getAttendance);
+                if (getAttendance1 != null)
                 {
+                    if (getAttendance1.RowId == getAttendance.rows[0].id)
+                    {
+                        return null;
+                    }
+                    string user = null;
+                    user = getAttendance.rows[0].user_id.user_id.Replace("_", "/");
+                    var getStudentDetails = GetStudentsForFeesCheck(user, 1, 1);
+                    if (getStudentDetails.Result.Count() != 0)
+                    {
+                        return getStudentDetails;
+                    }
                     return null;
                 }
-                string user = null;
-                user = getAttendance.rows[0].user_id.user_id.Replace("_", "/");
-                var getStudentDetails = GetStudentsForFeesCheck(user, 1, 1);
-                if (getStudentDetails.Result.Count() != 0)
+                else
                 {
-                    return getStudentDetails;
+                    string user = null;
+                    user = getAttendance.rows[0].user_id.user_id.Replace("_", "/");
+                    var getStudentDetails = GetStudentsForFeesCheck(user, 1, 1);
+                    if (getStudentDetails.Result.Count() != 0)
+                    {
+                        if (getStudentDetails.Result[0].Allow == "TRUE")
+                        {
+                            punchModel.FeesStatus = "PAID";
+                        }
+                        else if (getStudentDetails.Result[0].Allow == "FALSE")
+                        {
+                            punchModel.FeesStatus = "UNPAID";
+                        }
+                        _dataRepository.PostInOutPunch(punchModel);
+                        _dataRepository.InsertAttendanceEvents(getAttendance, deviceId);
+                        return getStudentDetails;
+                    }
                 }
                 return null;
             }
-            else
+            else if (deviceConfigurationKCA.Location == "campus")
             {
-                string user = null;
-                user = getAttendance.rows[0].user_id.user_id.Replace("_", "/");
-                var getStudentDetails = GetStudentsForFeesCheck(user, 1, 1);
-                if (getStudentDetails.Result.Count() != 0)
+                var getAttendance1 = _dataRepository.GetAttendanceFromDB(deviceId, getAttendance);
+                if (getAttendance1 != null)
                 {
-                    if (getStudentDetails.Result[0].Allow == "TRUE")
+                    if (getAttendance1.RowId == getAttendance.rows[0].id)
                     {
-                        punchModel.FeesStatus = "PAID";
+                        return null;
                     }
-                    else if (getStudentDetails.Result[0].Allow == "FALSE")
+                    string user = null;
+                    user = getAttendance.rows[0].user_id.user_id.Replace("_", "/");
+                    var getStudentDetails = GetStudentsForFeesCheck(user, 1, 1);
+                    if (getStudentDetails.Result.Count() != 0)
                     {
-                        punchModel.FeesStatus = "UNPAID";
+                        return getStudentDetails;
                     }
-                    _dataRepository.PostInOutPunch(punchModel);
-                    _dataRepository.InsertAttendanceEvents(getAttendance,deviceId);
-                    return getStudentDetails;
+                    return null;
                 }
+                else
+                {
+                    string user = null;
+                    user = getAttendance.rows[0].user_id.user_id.Replace("_", "/");
+                    var getStudentDetails = GetStudentsForFeesCheck(user, 1, 1);
+                    if (getStudentDetails.Result.Count() != 0)
+                    {
+                        if (getStudentDetails.Result[0].Allow == "TRUE")
+                        {
+                            punchModel.FeesStatus = "PAID";
+                        }
+                        else if (getStudentDetails.Result[0].Allow == "FALSE")
+                        {
+                            punchModel.FeesStatus = "UNPAID";
+                        }
+
+                        _dataRepository.InsertAttendanceEvents(getAttendance, deviceId);
+                        if (deviceConfigurationKCA.Type == "OUT")
+                        {
+                            _dataRepository.UpdateInOutPunch(punchModel);
+                        }
+                        else
+                        {
+
+                            _dataRepository.PostInOutPunch(punchModel);
+                        }
+                        return getStudentDetails;
+                    }
+                }
+                return null;
             }
             return null;
+
         }
 
         public List<StudentList> GetStudentsListForFilter()

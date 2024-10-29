@@ -895,34 +895,34 @@ namespace MOBILEAPI2024.API.Controllers
         //    }
         //}
 
-        [HttpPost(APIUrls.AddLectureAttendance)]
-        public IActionResult AddLectureAttendance(AddLectureAttendance addLectureAttendance)
-        {
-            Response response = new();
-            try
-            {
-                TryValidateModel(addLectureAttendance);
-                if (ModelState.IsValid)
-                {
-                    _dataService.AddLectureAttendance(addLectureAttendance);
-                    response.code = StatusCodes.Status200OK;
-                    response.status = true;
-                    response.message = CommonMessage.Success;
-                    return Ok(response);
-                }
-                response.code = StatusCodes.Status400BadRequest;
-                response.status = true;
-                response.message = CommonMessage.InValidToken;
-                return BadRequest(response);
-            }
-            catch (Exception ex)
-            {
-                response.code = StatusCodes.Status500InternalServerError;
-                response.status = false;
-                response.message = ex.Message;
-                return StatusCode(StatusCodes.Status500InternalServerError, response);
-            }
-        }
+        //[HttpPost(APIUrls.AddLectureAttendance)]
+        //public IActionResult AddLectureAttendance(AddLectureAttendance addLectureAttendance)
+        //{
+        //    Response response = new();
+        //    try
+        //    {
+        //        TryValidateModel(addLectureAttendance);
+        //        if (ModelState.IsValid)
+        //        {
+        //            _dataService.AddLectureAttendance(addLectureAttendance);
+        //            response.code = StatusCodes.Status200OK;
+        //            response.status = true;
+        //            response.message = CommonMessage.Success;
+        //            return Ok(response);
+        //        }
+        //        response.code = StatusCodes.Status400BadRequest;
+        //        response.status = true;
+        //        response.message = CommonMessage.InValidToken;
+        //        return BadRequest(response);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        response.code = StatusCodes.Status500InternalServerError;
+        //        response.status = false;
+        //        response.message = ex.Message;
+        //        return StatusCode(StatusCodes.Status500InternalServerError, response);
+        //    }
+        //}
 
         [HttpGet(APIUrls.SwipeStudents)]
         public IActionResult SwipeStudents()
@@ -1105,7 +1105,7 @@ namespace MOBILEAPI2024.API.Controllers
                         var getAttendance = _dataService.GetAttendanceFromBS(key, deviceId);
                         if (getAttendance.Response.message != "Login required.")
                         {
-                            var getAttendanceData = _dataService.GetAttendanceFromDB(getAttendance.EventCollection, null, deviceId);
+                            var getAttendanceData = _dataService.GetAttendanceFromDB(getAttendance.EventCollection, null, deviceId, checkDeviceConfig);
                             if (getAttendanceData != null)
                             {
                                 if (getAttendanceData.Result[0].Allow == "TRUE")
@@ -1146,7 +1146,7 @@ namespace MOBILEAPI2024.API.Controllers
                             var getAttendanc = _dataService.GetAttendanceFromBS(key, deviceId);
                             if (getAttendanc.Response.message != "Login required.")
                             {
-                                var getAttendanceData = _dataService.GetAttendanceFromDB(getAttendanc.EventCollection, null, deviceId);
+                                var getAttendanceData = _dataService.GetAttendanceFromDB(getAttendanc.EventCollection, null, deviceId,checkDeviceConfig);
                                 if (getAttendanceData != null)
                                 {
                                     if (getAttendanceData.Result[0].Allow == "TRUE")
@@ -1207,34 +1207,18 @@ namespace MOBILEAPI2024.API.Controllers
                         var getAttendance = _dataService.GetAttendanceFromBS(key, deviceId);
                         if (getAttendance.Response.message != "Login required.")
                         {
-                            foreach (Row row in getAttendance.EventCollection.rows)
+                            var getAttendanceData = _dataService.GetAttendanceFromDB(getAttendance.EventCollection, null, deviceId, checkDeviceConfig);
+                            if (getAttendanceData != null)
                             {
-                                AddCampusInOut addCampusInOut1 = new();
-                                addCampusInOut1.UserName = row.user_id.user_id.Replace("_", "/");
-                                addCampusInOut1.Campus = checkDeviceConfig.CampusName;
-                                addCampusInOut1.IOFlag = checkDeviceConfig.Type;
-                                addCampusInOut1.DateTime = row.datetime;
-                                var checkAttendance = _dataService.CheckCampusAttendance(addCampusInOut1);
-                                if (checkAttendance == "True")
-                                {
-                                    if(!_cache.TryGetValue("Popup", out string displ))
-                                    {
-                                        feesStatus.Type = "campus";
-                                        feesStatus.ShowPopup = "False";
-                                        feesStatus.Status = "";
-                                        feesStatus.StudentNo = "";
-                                        feesStatus.StudentName = "";
-                                        return Ok(feesStatus);
-                                    }
-
-                                    feesStatus.Type = "campus";
-                                    feesStatus.ShowPopup = "True";
-                                    feesStatus.Status = CommonMessage.AttendanceAlreadyExixts;
-                                    feesStatus.StudentNo = row.user_id.user_id.Replace("_", "/");
-                                    feesStatus.StudentName = row.user_id.user_id.Replace("_", "/");
-                                    return Ok(feesStatus);
-                                }
-                                _dataService.AddCampusAttendance(addCampusInOut1);
+                                feesStatus.Type = "campus";
+                                feesStatus.ShowPopup = "True";
+                                feesStatus.Status = CommonMessage.AttendanceAlreadyExixts;
+                                feesStatus.StudentNo = getAttendanceData.Result[0].student_no;
+                                feesStatus.StudentName = getAttendanceData.Result[0].name;
+                                return Ok(feesStatus);
+                            }
+                            else
+                            {
                                 feesStatus.Type = "campus";
                                 feesStatus.ShowPopup = "False";
                                 feesStatus.Status = "";
@@ -1242,6 +1226,7 @@ namespace MOBILEAPI2024.API.Controllers
                                 feesStatus.StudentName = "";
                                 return Ok(feesStatus);
                             }
+                           
                         }
                         else
                         {
@@ -1252,24 +1237,18 @@ namespace MOBILEAPI2024.API.Controllers
                             var getAttendanc = _dataService.GetAttendanceFromBS(key, deviceId);
                             if (getAttendanc.Response.message != "Login required.")
                             {
-                                foreach (Row row in getAttendance.EventCollection.rows)
+                                var getAttendanceData = _dataService.GetAttendanceFromDB(getAttendance.EventCollection, null, deviceId, checkDeviceConfig);
+                                if (getAttendanceData != null)
                                 {
-                                    AddCampusInOut addCampusInOut1 = new();
-                                    addCampusInOut1.UserName = row.user_id.user_id.Replace("_", "/");
-                                    addCampusInOut1.Campus = checkDeviceConfig.CampusName;
-                                    addCampusInOut1.IOFlag = checkDeviceConfig.Type;
-                                    addCampusInOut1.DateTime = row.datetime;
-                                    var checkAttendance = _dataService.CheckCampusAttendance(addCampusInOut1);
-                                    if (checkAttendance == "True")
-                                    {
-                                        feesStatus.Type = "campus";
-                                        feesStatus.ShowPopup = "True";
-                                        feesStatus.Status = CommonMessage.AttendanceAlreadyExixts;
-                                        feesStatus.StudentNo = row.user_id.user_id.Replace("_", "/");
-                                        feesStatus.StudentName = "";
-                                        return Ok(feesStatus);
-                                    }
-                                    _dataService.AddCampusAttendance(addCampusInOut1);
+                                    feesStatus.Type = "campus";
+                                    feesStatus.ShowPopup = "True";
+                                    feesStatus.Status = CommonMessage.AttendanceAlreadyExixts;
+                                    feesStatus.StudentNo = getAttendanceData.Result[0].student_no;
+                                    feesStatus.StudentName = getAttendanceData.Result[0].name;
+                                    return Ok(feesStatus);
+                                }
+                                else
+                                {
                                     feesStatus.Type = "campus";
                                     feesStatus.ShowPopup = "False";
                                     feesStatus.Status = "";
@@ -1295,7 +1274,6 @@ namespace MOBILEAPI2024.API.Controllers
             return Ok(feesStatus);
 
         }
-
 
         [HttpGet(APIUrls.StudentReport)]
         public IActionResult StudentReport(string StudentNo, int Month, int Year, DateTime? Date)

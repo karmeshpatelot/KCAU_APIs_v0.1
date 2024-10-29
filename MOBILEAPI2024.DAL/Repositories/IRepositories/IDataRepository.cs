@@ -41,5 +41,6 @@ namespace MOBILEAPI2024.DAL.Repositories.IRepositories
         void PostInOutPunch(PunchModel punchModel);
         void PostLoginReport(LoginReportKCA loginReportKCA);
         void UpdateDeviceConfig(DeviceConfig deviceConfig);
+        void UpdateInOutPunch(PunchModel punchModel);
     }
 }
