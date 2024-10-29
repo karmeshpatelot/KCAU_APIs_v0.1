@@ -700,14 +700,9 @@ namespace MOBILEAPI2024.API.Controllers
                                 customAttendance.display = "background";
                             }
                             customAttendancesForUser.Add(customAttendance);
-
-
                         }
-
-
                         customAttendanceList.attendances = customAttendancesForUser;
                         customAttendanceList.inOuts = inOutsForUser;
-
                         response.code = StatusCodes.Status200OK;
                         response.status = true;
                         response.message = CommonMessage.Success;
@@ -1276,12 +1271,12 @@ namespace MOBILEAPI2024.API.Controllers
         }
 
         [HttpGet(APIUrls.StudentReport)]
-        public IActionResult StudentReport(string StudentNo, int Month, int Year, DateTime? Date)
+        public IActionResult StudentReport(string StudentNo, int Month, int Year, DateTime? Date,string feesStatus)
         {
             Response response = new();
             try
             {
-                var getFilteredData = _dataService.GetFilteredData(StudentNo, Month, Year, Date);
+                var getFilteredData = _dataService.GetFilteredData(StudentNo, Month, Year, Date, feesStatus);
                 if (getFilteredData != null)
                 {
 
@@ -1307,12 +1302,12 @@ namespace MOBILEAPI2024.API.Controllers
         }
 
         [HttpGet(APIUrls.GetStudentsForFilter)]
-        public IActionResult GetStudentsForFilter()
+        public IActionResult GetStudentsForFilter(string? feesStatus)
         {
             Response response = new();
             try
             {
-                var students = _dataService.GetStudentsListForFilter();
+                var students = _dataService.GetStudentsListForFilter(feesStatus);
                 if (students.Count() != 0)
                 {
                     response.code = StatusCodes.Status200OK;

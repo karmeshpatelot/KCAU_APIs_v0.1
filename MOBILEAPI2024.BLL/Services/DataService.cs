@@ -799,9 +799,9 @@ namespace MOBILEAPI2024.BLL.Services
 
         }
 
-        public List<StudentList> GetStudentsListForFilter()
+        public List<StudentList> GetStudentsListForFilter(string? feesStatus)
         {
-            var students = _dataRepository.GetStudentsListForFilter();
+            var students = _dataRepository.GetStudentsListForFilter(feesStatus);
             if (students != null)
             {
                 return students;
@@ -809,7 +809,7 @@ namespace MOBILEAPI2024.BLL.Services
             return null;
         }
 
-        public AttendanceSummery GetFilteredData(string studentNo, int month, int year, DateTime? selectedDate)
+        public AttendanceSummery GetFilteredData(string studentNo, int month, int year, DateTime? selectedDate, string feesStatus)
         {
             AttendanceSummery attendanceSummery = new();
 
@@ -821,7 +821,7 @@ namespace MOBILEAPI2024.BLL.Services
             DateTime currentDate = DateTime.Now; // Get the current date
 
             // Get attendance data for the user within the specified month
-            var attendanceData = _dataRepository.GetFilteredData(studentNo, fromDate, toDate);
+            var attendanceData = _dataRepository.GetFilteredData(studentNo, fromDate, toDate, feesStatus);
 
             List<AttendanceReport> fullMonthAttendance = new List<AttendanceReport>();
 

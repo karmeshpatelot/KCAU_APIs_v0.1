@@ -27,11 +27,11 @@ namespace MOBILEAPI2024.DAL.Repositories.IRepositories
         List<ClassAttendanceForCal> GetClassAttendance(string? username, DateTime fromDate, DateTime toDate);
         AttendanceCount GetDashbordAttendanceReport();
         FeesCounts GetFeesCounts();
-        List<AttendanceReport> GetFilteredData(string studentNo, DateTime fromDate, DateTime toDate);
+        List<AttendanceReport> GetFilteredData(string studentNo, DateTime fromDate, DateTime toDate,string feesStatus);
         List<LoginReportKCA> GetLoginReport(DateTime date);
         Staff GetStaffDataFromDB(string? staffNo, int entriesPerPage, int pageNo);
         Students GetStudentsData(string? studentNo, int entriesPerPage, int pageNo);
-        List<StudentList> GetStudentsListForFilter();
+        List<StudentList> GetStudentsListForFilter(string feesStatus);
         void InsertAttendanceEvents(EventCollection getAttendance1,string deviceId);
         void InsertInOutRecord(Record record, int? cmp_ID, int? emp_ID);
         void InsertStaffRecord(Result staff);

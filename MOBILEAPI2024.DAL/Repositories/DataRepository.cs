@@ -312,18 +312,20 @@ namespace MOBILEAPI2024.DAL.Repositories
             return feesCounts;
         }
 
-        public List<AttendanceReport> GetFilteredData(string studentNo, DateTime fromDate, DateTime toDate)
+        public List<AttendanceReport> GetFilteredData(string studentNo, DateTime fromDate, DateTime toDate, string feesStatus)
         {
             using var vconn = GetOpenConnection();
             var vParams = new DynamicParameters();
             vParams.Add("@UserName", studentNo);
             vParams.Add("@FromDate", fromDate.Date);
             vParams.Add("@ToDate", toDate.Date);
+            vParams.Add("@FeesStatus", feesStatus);
             string Query = @"SELECT UserName, EnrollNo, ForDate, InTime, DeviceId, FeesStatus
                         FROM User_InOut_Records_KCA
                         WHERE UserName = @UserName
                         AND ForDate >= @FromDate
                         AND ForDate <= @ToDate
+                        AND FeesStatus = @FeesStatus
                          ";
             var data = vconn.Query<AttendanceReport>(Query, vParams).ToList();
             return data;
@@ -393,13 +395,26 @@ namespace MOBILEAPI2024.DAL.Repositories
             return students;
         }
 
-        public List<StudentList> GetStudentsListForFilter()
+        public List<StudentList> GetStudentsListForFilter(string? feesStatus)
         {
+            string Query;
             using var vconn = GetOpenConnection(); // Open a connection to the database
-            string Query = @"Select Distinct UserName, EnrollNo from User_InOut_Records_KCA ";
-            var data = vconn.Query<StudentList>(Query).ToList();
-            return data;
+            var vParams = new DynamicParameters();
+            if (feesStatus == null || feesStatus == "")
+            {
+                Query = @"Select Distinct UserName, EnrollNo from User_InOut_Records_KCA ";
+                var data = vconn.Query<StudentList>(Query).ToList();
+                return data;
+            }
+            else
+            {
+                vParams.Add("@FeesStatus", feesStatus);
+                Query = @"Select Distinct UserName, EnrollNo from User_InOut_Records_KCA where FeesStatus = @FeesStatus";
+                var data = vconn.Query<StudentList>(Query, vParams).ToList();
+                return data;
+            }
         }
+
 
         public void InsertAttendanceEvents(EventCollection getAttendance1, string deviceId)
         {
