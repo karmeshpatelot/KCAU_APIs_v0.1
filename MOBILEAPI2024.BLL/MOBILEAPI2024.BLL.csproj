@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.2.0" />
+		<PackageReference Include="MailKit" Version="4.4.0" />
+		<PackageReference Include="System.ServiceModel.Duplex" Version="6.0.*" />
+		<PackageReference Include="System.ServiceModel.Federation" Version="6.0.*" />
+		<PackageReference Include="System.ServiceModel.Http" Version="6.0.*" />
+		<PackageReference Include="System.ServiceModel.NetTcp" Version="6.0.*" />
+		<PackageReference Include="System.ServiceModel.Security" Version="6.0.*" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\MOBILEAPI2024.DAL\MOBILEAPI2024.DAL.csproj" />
+	  <ProjectReference Include="..\MOBILEAPI2024.DTO\MOBILEAPI2024.DTO.csproj" />
+	</ItemGroup>
+</Project>

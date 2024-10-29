@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Controllers\u1jznwbo.c2w~" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore" Version="2.49.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.15" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.15" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.15" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.15" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.15" />
+		<PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="7.0.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="NSwag.ApiDescription.Client" Version="13.18.2">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+		<PackageReference Include="System.Collections" Version="4.3.0" />
+		<PackageReference Include="System.ServiceModel.Duplex" Version="6.0.*" />
+		<PackageReference Include="System.ServiceModel.Federation" Version="6.0.*" />
+		<PackageReference Include="System.ServiceModel.Http" Version="6.0.*" />
+		<PackageReference Include="System.ServiceModel.NetTcp" Version="6.0.*" />
+		<PackageReference Include="System.ServiceModel.Security" Version="6.0.*" />
+		<PackageReference Include="UAParser" Version="3.1.46" />
+	</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MOBILEAPI2024.BLL\MOBILEAPI2024.BLL.csproj" />
+    <ProjectReference Include="..\MOBILEAPI2024.DAL\MOBILEAPI2024.DAL.csproj" />
+    <ProjectReference Include="..\MOBILEAPI2024.DTO\MOBILEAPI2024.DTO.csproj" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
+</Project>

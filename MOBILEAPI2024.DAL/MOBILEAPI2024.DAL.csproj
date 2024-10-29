@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.1.35" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.15" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\MOBILEAPI2024.DTO\MOBILEAPI2024.DTO.csproj" />
+	</ItemGroup>
+</Project>
