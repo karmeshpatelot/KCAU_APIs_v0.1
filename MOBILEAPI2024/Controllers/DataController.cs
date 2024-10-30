@@ -663,25 +663,13 @@ namespace MOBILEAPI2024.API.Controllers
                             attendance.InTime = Convert.ToString(campusAttendance.InTime);
                             attendance.OutTime = Convert.ToString(campusAttendance.OutTime);
 
-                            if (Convert.ToString(campusAttendance.InTime) != null && Convert.ToString(campusAttendance.OutTime) != null && campusAttendance.UserName != null)
+                            if (campusAttendance.Status == "Present")
                             {
                                 customAttendance.id = Convert.ToString(campusAttendance.InTime) + " to " + Convert.ToString(campusAttendance.OutTime);
                                 DateTime parsedDate = DateTime.ParseExact(Convert.ToString(campusAttendance.ForDate), "M/d/yyyy h:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
                                 string formattedDate = parsedDate.ToString("yyyy-MM-dd");
                                 customAttendance.start = formattedDate;
                                 customAttendance.backgroundColor = "green";
-                                customAttendance.textColor = "#000";
-                                customAttendance.color = "#000";
-                                customAttendance.eventTextColor = "#000";
-                                customAttendance.display = "background";
-                            }
-                            else if (Convert.ToString(campusAttendance.InTime) != null)
-                            {
-                                customAttendance.id = Convert.ToString(campusAttendance.InTime) + " - ";
-                                DateTime parsedDate = DateTime.ParseExact(Convert.ToString(campusAttendance.ForDate), "M/d/yyyy h:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
-                                string formattedDate = parsedDate.ToString("yyyy-MM-dd");
-                                customAttendance.start = formattedDate;
-                                customAttendance.backgroundColor = "red";
                                 customAttendance.textColor = "#000";
                                 customAttendance.color = "#000";
                                 customAttendance.eventTextColor = "#000";
@@ -795,6 +783,104 @@ namespace MOBILEAPI2024.API.Controllers
                 }
             }
             return BadRequest("No type found.");
+        }
+
+        [HttpGet(APIUrls.CampusAttendanceReport)]
+        public IActionResult CampusAttendanceReport(string? username, int month)
+        {
+            Response response = new();
+
+            try
+            {
+                string user = null;
+                if (username != null)
+                {
+                    user = username.Replace("/", "_");
+                }
+
+                AttendanceDetails attendanceDetails = new();
+                List<Attendance> attendancesforUser = new();
+                List<Attendance> attendances = new();
+                List<CustomAttendance> customAttendances = new();
+                List<CustomAttendance> customAttendancesForUser = new();
+                CustomAttendanceList customAttendanceList = new();
+                List<InOut> inOuts = new();
+                List<InOut> inOutsForUser = new();
+
+                var getInoutData = _dataService.GetCampusAttendance(username, month);
+                if (getInoutData != null)
+                {
+
+                    //int id = 0;
+                    //foreach (CampusAttendance campusAttendance in getInoutData)
+                    //{
+                    //    CustomAttendance customAttendance = new();
+                    //    Attendance attendance = new();
+                    //    InOut inOut = new();
+                    //    attendance.Date = Convert.ToString(campusAttendance.ForDate);
+                    //    attendance.InTime = Convert.ToString(campusAttendance.InTime);
+                    //    attendance.OutTime = Convert.ToString(campusAttendance.OutTime);
+
+                    //    if (Convert.ToString(campusAttendance.InTime) != null && Convert.ToString(campusAttendance.OutTime) != null && campusAttendance.UserName != null)
+                    //    {
+                    //        customAttendance.id = Convert.ToString(campusAttendance.InTime) + " to " + Convert.ToString(campusAttendance.OutTime);
+                    //        DateTime parsedDate = DateTime.ParseExact(Convert.ToString(campusAttendance.ForDate), "M/d/yyyy h:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
+                    //        string formattedDate = parsedDate.ToString("yyyy-MM-dd");
+                    //        customAttendance.start = formattedDate;
+                    //        customAttendance.backgroundColor = "green";
+                    //        customAttendance.textColor = "#000";
+                    //        customAttendance.color = "#000";
+                    //        customAttendance.eventTextColor = "#000";
+                    //        customAttendance.display = "background";
+                    //    }
+                    //    else if (Convert.ToString(campusAttendance.InTime) != null)
+                    //    {
+                    //        customAttendance.id = Convert.ToString(campusAttendance.InTime) + " - ";
+                    //        DateTime parsedDate = DateTime.ParseExact(Convert.ToString(campusAttendance.ForDate), "M/d/yyyy h:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
+                    //        string formattedDate = parsedDate.ToString("yyyy-MM-dd");
+                    //        customAttendance.start = formattedDate;
+                    //        customAttendance.backgroundColor = "red";
+                    //        customAttendance.textColor = "#000";
+                    //        customAttendance.color = "#000";
+                    //        customAttendance.eventTextColor = "#000";
+                    //        customAttendance.display = "background";
+                    //    }
+                    //    else
+                    //    {
+                    //        customAttendance.id = " ";
+                    //        DateTime parsedDate = DateTime.ParseExact(Convert.ToString(campusAttendance.ForDate), "M/d/yyyy h:mm:ss tt", System.Globalization.CultureInfo.InvariantCulture);
+                    //        string formattedDate = parsedDate.ToString("yyyy-MM-dd");
+                    //        customAttendance.start = formattedDate;
+                    //        customAttendance.backgroundColor = "red";
+                    //        customAttendance.textColor = "#000";
+                    //        customAttendance.color = "#000";
+                    //        customAttendance.eventTextColor = "#000";
+                    //        customAttendance.display = "background";
+                    //    }
+                    //    customAttendancesForUser.Add(customAttendance);
+                    //}
+                    response.code = StatusCodes.Status200OK;
+                    response.status = true;
+                    response.message = CommonMessage.Success;
+                    response.data = getInoutData;
+                    return Ok(response);
+
+                }
+                response.code = StatusCodes.Status404NotFound;
+                response.status = true;
+                response.message = CommonMessage.NoDataFound;
+                return NotFound(response);
+
+            }
+            catch (Exception ex)
+            {
+                response.code = StatusCodes.Status500InternalServerError;
+                response.status = false;
+                response.message = ex.Message;
+                return StatusCode(StatusCodes.Status500InternalServerError, response);
+            }
+
+
         }
 
         //[HttpPost(APIUrls.AddCampusAttendance)]
@@ -1141,7 +1227,7 @@ namespace MOBILEAPI2024.API.Controllers
                             var getAttendanc = _dataService.GetAttendanceFromBS(key, deviceId);
                             if (getAttendanc.Response.message != "Login required.")
                             {
-                                var getAttendanceData = _dataService.GetAttendanceFromDB(getAttendanc.EventCollection, null, deviceId,checkDeviceConfig);
+                                var getAttendanceData = _dataService.GetAttendanceFromDB(getAttendanc.EventCollection, null, deviceId, checkDeviceConfig);
                                 if (getAttendanceData != null)
                                 {
                                     if (getAttendanceData.Result[0].Allow == "TRUE")
@@ -1221,7 +1307,7 @@ namespace MOBILEAPI2024.API.Controllers
                                 feesStatus.StudentName = "";
                                 return Ok(feesStatus);
                             }
-                           
+
                         }
                         else
                         {
@@ -1271,7 +1357,7 @@ namespace MOBILEAPI2024.API.Controllers
         }
 
         [HttpGet(APIUrls.StudentReport)]
-        public IActionResult StudentReport(string StudentNo, int Month, int Year, DateTime? Date,string feesStatus)
+        public IActionResult StudentReport(string StudentNo, int Month, int Year, DateTime? Date, string feesStatus)
         {
             Response response = new();
             try

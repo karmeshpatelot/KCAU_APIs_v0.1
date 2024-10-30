@@ -25,6 +25,7 @@ namespace MOBILEAPI2024.DTO.Common
         public const string DeleteExpiredOTP = "DeleteExpiredOTP";
         public const string GetAttendance = "GetAttendance";
         public const string GetAttendances = "GetAttendances";
+        public const string CampusAttendanceReport = "CampusAttendanceReport";
         public const string SwipeInOut = "SwipeInOut";
         public const string GetClassWiseAttendance = "GetClassWiseAttendance";
         public const string DayWiseAttendance = "DayWiseAttendance";

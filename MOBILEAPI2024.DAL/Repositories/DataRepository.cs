@@ -217,32 +217,58 @@ namespace MOBILEAPI2024.DAL.Repositories
             vParams.Add("@FromDate", fromDate.Date);
             vParams.Add("@ToDate", toDate.Date);
             string query = @"WITH DateRange AS (
-                            SELECT CAST(@FromDate AS DATE) AS ForDate
-                            UNION ALL
-                            SELECT DATEADD(DAY, 1, ForDate)
-                            FROM DateRange
-                            WHERE ForDate < CAST(@ToDate AS DATE)
-                        )
-                        SELECT 
-                            dr.ForDate,
-                            c.UserName,
-                            ISNULL(MIN(CASE WHEN c.IO_Flag = 'IN' THEN c.In_Out_Time END), '') AS InTime,
-                            ISNULL(MAX(CASE WHEN c.IO_Flag = 'OUT' THEN c.In_Out_Time END), '') AS OutTime
-                        FROM 
-                            DateRange dr
-                        LEFT JOIN 
-                            Campus_Attendance_KCA c ON c.ForDate = dr.ForDate AND c.UserName = @UserName
-                        WHERE 
-                            dr.ForDate BETWEEN @FromDate AND @ToDate
-                        GROUP BY 
-                            dr.ForDate, c.UserName
-                        ORDER BY 
-                            dr.ForDate
-                        OPTION (MAXRECURSION 0);
+    SELECT CAST(@FromDate AS DATE) AS ForDate
+    UNION ALL
+    SELECT DATEADD(DAY, 1, ForDate)
+    FROM DateRange
+    WHERE ForDate < DATEADD(DAY, 1, CAST(@ToDate AS DATE))  -- Include end date by adding one day
+)
+SELECT 
+    dr.ForDate,
+    ISNULL(u.UserName, @UserName) AS UserName,  -- Default to '24_00159' when UserName is NULL
+    ISNULL(MIN(u.InTime), '') AS InTime,
+    ISNULL(MAX(u.OutTime), '') AS OutTime,
+    CASE 
+        WHEN MIN(u.InTime) IS NOT NULL THEN 'Present'
+        ELSE 'Absent'
+    END AS Status,
+    u.Duration
+FROM 
+    DateRange dr
+LEFT JOIN 
+    User_InOut_Records_KCA u 
+ON 
+    u.ForDate = dr.ForDate 
+    AND u.UserName = @UserName
+    AND u.LocationType = 'campus'  -- Ensure only campus records are included
+WHERE 
+    dr.ForDate BETWEEN @FromDate AND @ToDate
+GROUP BY 
+    dr.ForDate, u.UserName,u.Duration
+ORDER BY 
+    dr.ForDate
+OPTION (MAXRECURSION 0);
+
                         
                         ";
             string query2 = @"
-                select UserName,ForDate,InTime,OutTime from User_InOut_Records_KCA where LocationType = 'campus' and UserName =@UserName and ForDate between @FromDate and @ToDate";
+                SELECT 
+    UserName,
+    ForDate,
+    InTime,
+    OutTime,
+    Duration,
+    CASE 
+        WHEN InTime IS NOT NULL THEN 'Present'
+        ELSE 'Absent'
+    END AS Status
+FROM 
+    User_InOut_Records_KCA
+WHERE 
+    LocationType = 'campus' 
+    AND UserName = @UserName 
+    AND ForDate BETWEEN @FromDate AND @ToDate;
+";
             var data = vconn.Query<CampusAttendance>(query, vParams).ToList();
             return data;
         }
