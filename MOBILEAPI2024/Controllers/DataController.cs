@@ -1414,7 +1414,6 @@ namespace MOBILEAPI2024.API.Controllers
                 response.message = ex.Message;
                 return BadRequest(response);
             }
-
         }
 
         [HttpGet(APIUrls.GetLoginReport)]
